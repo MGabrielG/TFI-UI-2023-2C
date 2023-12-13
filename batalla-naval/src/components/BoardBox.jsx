@@ -5,8 +5,9 @@ import { Link } from 'react-router-dom';
 // import {Navigation } from 'swiper/modules';
 import '../styles.css'
 
-export default function BoardBox() {
+export default function BoardBox( {value, handleClick, position} ) {
+
   return (
-    <button className='board-box'></button>
+    <button onClick={() => handleClick(position.x, position.y)} className={`board-box ${value}`}></button>
   )
 }

@@ -6,3 +6,10 @@
   box-shadow: inset 0 0 5px rgba(0, 0, 0, 0.2);
 }
 
+.ship, .submarine, .aircraft_carrier, .cruiser, .motorboat {
+  background-color: red;
+}
+
+.empty {
+  background-color: blue;
+}

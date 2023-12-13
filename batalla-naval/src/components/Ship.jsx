@@ -1,9 +1,9 @@
-import React from 'react';
-import { useDrag, useDrop, DndProvider } from "react-dnd";
-import { HTML5Backend } from "react-dnd-html5-backend";
+import React, { useEffect, useState } from 'react';
+import { useDrag } from "react-dnd";
 
-const Ship = ({ shipType, initialPosition}) => {
+const Ship = ({ shipType, initialPosition, onSelect }) => {
   const length = shipType.length;
+  const [windowScroll, setWindowScroll] = useState({});
   const [{ isDragging }, drag] = useDrag({
     type: 'SHIP',
     item: shipType,
@@ -14,25 +14,54 @@ const Ship = ({ shipType, initialPosition}) => {
 
   const isVertical = shipType.hasOwnProperty('isVertical') ? shipType.isVertical : false;
 
-  // const boardPosition = document.getElementById('board').getBoundingClientRect();
-  const boardPosition = document.getElementById('board').getBoundingClientRect();
+ // const boardPosition = document.getElementById('board').getBoundingClientRect();
+  const boardElement = document.getElementById('ship-board');
+  const boardPosition = boardElement.getBoundingClientRect();
+  
+  //Hace falta para que no se desacomoden los barcos al redimensionar la pantalla, y no use windowScroll pq sino tira error al primer render en el tablero
+  useEffect(() => {
+    const updateScrollPosition = () => {
+      setWindowScroll({
+        y: window.scrollY,
+        x: window.scrollX,
+      });
+    };
+
+    // Initial update
+    updateScrollPosition();
+
+    // Attach event listeners for scroll changes
+    window.addEventListener('resize', updateScrollPosition);
+
+    // Clean up event listeners on component unmount
+    return () => {
+      window.removeEventListener('resize', updateScrollPosition);
+    };
+  }, []);
+
+  const handleClick = () => {
+    if (!onSelect) return;
+    onSelect(shipType.name);
+  }
+
   return (
     <div
       ref={drag}
       style={{
         opacity: isDragging ? 0.5 : 1,
         cursor: 'move',
-        width: 40 * shipType.length, // Adjust the size as needed
+        width: 40 * shipType.length,
         height: `40px`,
-        backgroundColor: 'gray', // Set your ship color
+        backgroundColor: 'gray',
         border: '1px solid black',
         //margin: '5px',
         position: initialPosition ? 'absolute' : 'relative',
-        top: initialPosition ? boardPosition.top + window.scrollY + initialPosition.y * 40 : 0, // Adjust as needed
-        left: initialPosition ? boardPosition.left + window.scrollX + initialPosition.x * 40 : 0, // Adjust as needed
+        top: initialPosition ? boardPosition.top + window.scrollY + initialPosition.y * 40 + (shipType.isVertical ? + 20 * (shipType.length - 1) : 0): 'auto',
+        left: initialPosition ? boardPosition.left + window.scrollX + initialPosition.x * 40 + (shipType.isVertical ? - 20 * (shipType.length - 1 ) : 0): 'auto',
         zIndex: 555,
-        transform: isVertical && "rotate(90deg)",
+        transform: isVertical ? "rotate(90deg)": "none",
       }}
+      onClick={handleClick}
     />
   );
 };

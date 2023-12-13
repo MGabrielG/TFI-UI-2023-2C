@@ -10,7 +10,7 @@ import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import Ship from './Ship';
 
-export default function Board( { board, handleDrop } ) {
+export default function ShipsBoard( { board, handleDrop } ) {
 
   const [ships, setShips] = useState([]);
 
@@ -38,19 +38,22 @@ export default function Board( { board, handleDrop } ) {
       // handleDrop(item, Math.floor(x / 40), Math.floor(y / 40));
       
       const dropPosition = monitor.getClientOffset();
-      const boardPosition = document.getElementById('board').getBoundingClientRect();
+      const boardElement = document.getElementById('ship-board');
+      const boardPosition = document.getElementById('ship-board').getBoundingClientRect();
 
       const isVertical = item.hasOwnProperty('isVertical') ? item.isVertical : false;
       const xLimit = isVertical ? 1 : item.length;
       const yLimit = isVertical ? item.length : 1;
+
+      const containerPosition = boardElement.parentElement.getBoundingClientRect();
       
       // Calculate the position on the board
       var x = Math.floor((dropPosition.x - boardPosition.left) / 40) ;
       var y = Math.floor((dropPosition.y - boardPosition.top) / 40) ;
-      if (x > (thisBoard[0].length - xLimit) || x < 0) {x = item.position.x }
-      if (y > (thisBoard.length - yLimit) || y < 0) {y = item.position.y }
+      if (x > (thisBoard[0].length - xLimit) || x < 0) { return }
+      if (y > (thisBoard.length - yLimit) || y < 0) { return }
+
       handleDrop(item, x, y);
-      addOrMoveShip(item, x, y);
 
 
       // addOrMoveShip(item, Math.floor(x / 40), Math.floor(y / 40))
@@ -78,29 +81,17 @@ export default function Board( { board, handleDrop } ) {
     }
   }, []);
 
-  console.log("filter: " );
-  console.log(ships);
   return (
-    <div ref={drop} id='board'>
+    <div ref={drop} id='ship-board' style={{display: 'flex', flexDirection: 'column'}}>
     {/* ref={drop}> */}
     {thisBoard &&
       thisBoard.map( (row, indexR) => (
-        <div key={indexR} style={{flexDirection: 'row'}}>
+        <div key={indexR} style={{flexDirection: 'row', display:'flex'}}>
           {
             row.map((cell, indexC) => {
               
               return (<React.Fragment key={indexR + "y" + indexC}>
                 <BoardBox key={indexC + "x" + indexR}/> 
-                {/* {ships && ships.some((v) => v.position[0] == indexC && v.position[1] == indexR) ?
-                //ships && ships.length > 0 && ships[0].position[0] == 1 && ships[0].position[1] == 9 ?
-                  ships.filter((v) => v.position[0] == indexC && v.position[1] == indexR).map( (s, indexS) => {
-                    return <Ship key={indexR + indexC + indexS} shipType={s} initialPosition={{y: indexR, x: indexC}}/>
-                  })
-                  // <Ship key={indexR + indexC} shipType={ships[0]} initialPosition={{y: indexR, x: indexC}}/>
-                  : 
-                  <></>
-                } */}
-                {/* <Ship key={indexR + indexC} shipType={ships[0]} initialPosition={{y: indexR, x: indexC}}/> */}
               </React.Fragment>)
                 
             })
@@ -108,11 +99,11 @@ export default function Board( { board, handleDrop } ) {
         </div>
       ))
     }
-    {thisBoard && ships &&
+    {/* {thisBoard && ships &&
       ships.map(s => {
         return <Ship key={s.name} shipType={s} initialPosition={{y: s.position.y, x: s.position.x}}/>
       }) 
-    }
+    } */}
     </div>
   )
 }
