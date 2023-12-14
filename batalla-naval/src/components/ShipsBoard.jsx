@@ -34,20 +34,17 @@ export default function ShipsBoard( { board, handleDrop, otherPlayerGuessBoard }
   const [, drop] = useDrop({
     accept: 'SHIP',
     drop: (item, monitor) => {
-      // const { x, y } = monitor.getSourceClientOffset();
-      // handleDrop(item, Math.floor(x / 40), Math.floor(y / 40));
       
       const dropPosition = monitor.getClientOffset();
-      const boardElement = document.getElementById('ship-board');
+      //const boardElement = document.getElementById('ship-board');
       const boardPosition = document.getElementById('ship-board').getBoundingClientRect();
 
       const isVertical = item.hasOwnProperty('isVertical') ? item.isVertical : false;
       const xLimit = isVertical ? 1 : item.length;
       const yLimit = isVertical ? item.length : 1;
 
-      const containerPosition = boardElement.parentElement.getBoundingClientRect();
+      //const containerPosition = boardElement.parentElement.getBoundingClientRect();
       
-      // Calculate the position on the board
       var x = Math.floor((dropPosition.x - boardPosition.left) / 40) ;
       var y = Math.floor((dropPosition.y - boardPosition.top) / 40) ;
       if (x > (thisBoard[0].length - xLimit) || x < 0) { return }
@@ -55,17 +52,6 @@ export default function ShipsBoard( { board, handleDrop, otherPlayerGuessBoard }
 
       handleDrop(item, x, y);
 
-
-      // addOrMoveShip(item, Math.floor(x / 40), Math.floor(y / 40))
-
-      // const { x, y } = monitor.getClientOffset();
-      // const { left, top } = document.getElementById('board').getBoundingClientRect();
-      // const offsetX = x - left - window.scrollX;
-      // const offsetY = y - top - window.scrollY;
-      // const cellX = Math.floor(offsetX / 40);
-      // const cellY = Math.floor(offsetY / 40);
-      // handleDrop(item, cellX, cellY);
-      // addOrMoveShip(item, cellX, cellY);
     },
   });
   
@@ -74,8 +60,7 @@ export default function ShipsBoard( { board, handleDrop, otherPlayerGuessBoard }
     if (board) {
       setThisBoard(board)
     } else {
-      //setThisBoard(Array.from({ length: 10 }, () => Array(10).fill("empty")));
-      // setThisBoard(Array(10).map(() => Array(10).fill("empty")));
+
       setThisBoard(Array.from({ length: 10 }, () =>
         Array.from({ length: 10 }, () => "empty")));
     }
