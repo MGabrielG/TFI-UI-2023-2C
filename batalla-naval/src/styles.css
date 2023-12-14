@@ -8,6 +8,7 @@
 
 .ship, .submarine, .aircraft_carrier, .cruiser, .motorboat {
   background-color: red;
+  z-index: 2000;
 }
 
 .empty {

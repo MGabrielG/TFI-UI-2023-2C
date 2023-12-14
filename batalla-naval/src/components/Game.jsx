@@ -8,10 +8,10 @@ import ShipsBoard from "./ShipsBoard.jsx";
 import { DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import Ship from "./Ship";
-import { shipValues, rawValues } from "../constants.js";
+import { shipValues, rawValues, gameStates } from "../constants.js";
 import GuessBoard from "./GuessBoard.jsx";
 
-export default function Game() {
+export default function Game({isVsGame}) {
   //solo barcos fuera del tablero
   const [ships, setShips] = useState([]);
   //barcos en tablero
@@ -21,15 +21,18 @@ export default function Game() {
 
   const [player1GuessBoard, setPlayer1GuessBoard] = useState([]);
   const [player2GuessBoard, setPlayer2GuessBoard] = useState([]);
-  const [player2Board, setPlayer2Board] = useState([])
+  const [player1Board, setPlayer1Board] = useState([]);
+  const [player2Board, setPlayer2Board] = useState([]);
+  const [gameState, setGameState] = useState(gameStates.selectingShips);
 
   useEffect(() => {
-    setShips([shipValues.submarine, shipValues.aircraft_carrier]);
+    setShips([shipValues.submarine, shipValues.aircraft_carrier,
+      shipValues.motorboat, shipValues.cruiser]);
 
     setPlayer1GuessBoard(newBoard('unknown'));
     setPlayer2GuessBoard(newBoard('unknown'));
     setPlayer2Board(newBoard('empty'));
-
+    setPlayer1Board(newBoard('empty'));
   }, []);
 
   const newBoard = (text) => {
@@ -72,6 +75,7 @@ export default function Game() {
   };
 
   const rotateCurrentShip = () => {
+    if (gameState != gameStates.selectingShips) {return; }
     if (
       currentSelectedShip &&
       boardShips.some((s) => s.name == currentSelectedShip)
@@ -140,19 +144,84 @@ export default function Game() {
     return false;
   }
 
-  const handleGuess = (x, y) => {
+  const handleP1Guess = (x, y) => {
+    if (player1GuessBoard[y][x] != 'unknown') { return; }
     const newBoard = [...player1GuessBoard];
     newBoard[y][x] = player2Board[y][x];
     setPlayer1GuessBoard(newBoard);
   }
 
   useEffect(() => {
+    if (gameState != gameStates.inGame) { return; }
+    if (!isVsGame){
+      let x;
+      let y;
+      do {
+        x = Math.floor(Math.random() * 10);
+        y = Math.floor(Math.random() * 10);
+      } while (player2GuessBoard[y][x] != 'unknown');
+
+      handleP2Guess(x, y);
+    }
+  }, [player1GuessBoard])
+
+  const handleP2Guess = (x, y) => {
+    const newBoard = [...player2GuessBoard];
+    newBoard[y][x] = player1Board[y][x];
+    setPlayer2GuessBoard(newBoard);
+  }
+
+  const startGame = () => {
+    let allGood = true;
+    if (ships && ships.length > 0) {
+      alert("You have to put all the ships in the board");
+      return;
+    }
+    boardShips.forEach((s) => {
+      if ((s.isVertical && s.position.y + s.length > 10) || (!s.isVertical && s.position.x + s.length > 10)){
+        alert("No ship can be out of the board");
+        allGood = false;
+        return;
+      }
+    })
+    
+    const mappedBoard = mapPlayer1Board();
+
+    if (mappedBoard) {
+      setGameState(gameStates.inGame);
+      // mapPlayer1Board();
+      setPlayer1Board(mappedBoard);
+      return;
+    }
+    
+    alert("Ships cannot be overlapped");
+    return;
+
+  }
+
+  const mapPlayer1Board = () => {
+    let tempBoard = newBoard('empty');
+    let isGoodBoard = true;
+    boardShips.forEach((s)=> {
+      if (s.isVertical) {
+        for (let i = 0; i < s.length; i++){
+          if (tempBoard[s.position.y + i][s.position.x] != 'empty') { isGoodBoard = false };
+          tempBoard[s.position.y + i][s.position.x] = s.name;
+        }
+      } else {
+        for (let i = 0; i < s.length; i++){
+          if (tempBoard[s.position.y][s.position.x + i] != 'empty') { isGoodBoard = false };
+          tempBoard[s.position.y][s.position.x + i] = s.name;
+        }
+      }
+    })
+    if (isGoodBoard) return tempBoard;
+    return null;
+  }
+
+  useEffect(() => {
     makeComputerPlaceShips();
   }, []);
-  
-  useEffect(()=> {
-    console.log(player2Board);
-  }, [player2Board]);
 
   return (
     <div
@@ -174,7 +243,7 @@ export default function Game() {
           }}
         >
           <div style={{ flex: 1 }}>
-            <ShipsBoard handleDrop={handleDrop} />
+            <ShipsBoard handleDrop={handleDrop} otherPlayerGuessBoard={player2GuessBoard} />
           </div>
           <div
             style={{
@@ -184,7 +253,7 @@ export default function Game() {
               gap: "1em",
             }}
           >
-            <button style={{ textAlign: "center", width: "20em" }}>
+            <button style={{ textAlign: "center", width: "20em" }} onClick={startGame}>
               Start Game
             </button>
             <button
@@ -200,7 +269,7 @@ export default function Game() {
           </div>
           <div style={{ display: "flex", flex: 1 }}>
             { player2Board && player2Board.length > 0 &&
-              <GuessBoard board={player1GuessBoard} handleClick={handleGuess} />
+              <GuessBoard board={player1GuessBoard} handleClick={(gameState == gameStates.inGame)? handleP1Guess : () => {}} />
             }
           </div>
         </div>
@@ -211,8 +280,9 @@ export default function Game() {
                 key={s.name}
                 shipType={s}
                 initialPosition={{ y: s.position.y, x: s.position.x }}
-                isValidForSelection={true}
+                isValidForSelection={gameState != gameStates.inGame}
                 onSelect={selectShip}
+                isSelected={currentSelectedShip == s.name}
               />
             );
           })}

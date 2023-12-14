@@ -20,6 +20,12 @@ export const shipValues = {
     }
 }
 
+export const gameStates = {
+    inGame: 'inGame',
+    selectingShips: 'selectingShips',
+    
+}
+
 export const rawValues = {
     vertical: 'vertical',
     horizontal: 'horizontal',

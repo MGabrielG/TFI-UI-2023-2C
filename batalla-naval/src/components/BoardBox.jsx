@@ -8,6 +8,6 @@ import '../styles.css'
 export default function BoardBox( {value, handleClick, position} ) {
 
   return (
-    <button onClick={() => handleClick(position.x, position.y)} className={`board-box ${value}`}></button>
+    <button onClick={position ? () => handleClick(position.x, position.y) : () => {}} className={`board-box ${value}`}></button>
   )
 }

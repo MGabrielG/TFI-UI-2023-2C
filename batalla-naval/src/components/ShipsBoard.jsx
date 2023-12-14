@@ -10,7 +10,7 @@ import { useDrag, useDrop, DndProvider } from "react-dnd";
 import { HTML5Backend } from "react-dnd-html5-backend";
 import Ship from './Ship';
 
-export default function ShipsBoard( { board, handleDrop } ) {
+export default function ShipsBoard( { board, handleDrop, otherPlayerGuessBoard } ) {
 
   const [ships, setShips] = useState([]);
 
@@ -91,7 +91,7 @@ export default function ShipsBoard( { board, handleDrop } ) {
             row.map((cell, indexC) => {
               
               return (<React.Fragment key={indexR + "y" + indexC}>
-                <BoardBox key={indexC + "x" + indexR}/> 
+                <BoardBox key={indexC + "x" + indexR} value={otherPlayerGuessBoard[indexR][indexC]}/> 
               </React.Fragment>)
                 
             })

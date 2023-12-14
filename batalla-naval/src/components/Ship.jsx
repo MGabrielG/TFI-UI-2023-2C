@@ -1,12 +1,13 @@
 import React, { useEffect, useState } from 'react';
 import { useDrag } from "react-dnd";
 
-const Ship = ({ shipType, initialPosition, onSelect }) => {
+const Ship = ({ shipType, initialPosition, onSelect, isValidForSelection, isSelected}) => {
   const length = shipType.length;
   const [windowScroll, setWindowScroll] = useState({});
   const [{ isDragging }, drag] = useDrag({
     type: 'SHIP',
     item: shipType,
+    canDrag: isValidForSelection,
     collect: (monitor) => ({
       isDragging: !!monitor.isDragging(),
     }),
@@ -60,8 +61,10 @@ const Ship = ({ shipType, initialPosition, onSelect }) => {
         left: initialPosition ? boardPosition.left + window.scrollX + initialPosition.x * 40 + (shipType.isVertical ? - 20 * (shipType.length - 1 ) : 0): 'auto',
         zIndex: 555,
         transform: isVertical ? "rotate(90deg)": "none",
+        filter: isSelected && isValidForSelection ? 'sepia(100%) saturate(100%) brightness(1.2)' : 'none',
       }}
       onClick={handleClick}
+      onDragStart={handleClick}
     />
   );
 };
